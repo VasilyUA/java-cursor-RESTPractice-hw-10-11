@@ -4,6 +4,7 @@ import com.example.demo.dtos.course.input.*;
 import com.example.demo.dtos.course.output.*;
 import com.example.demo.exceptions.*;
 import com.example.demo.services.*;
+import io.swagger.annotations.Api;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@Api(tags = "Courses")
 @RestController
 @RequestMapping("/api/courses")
 @RequiredArgsConstructor
@@ -74,4 +75,29 @@ public class CoursesController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\": \"Internal server error\"}");
         }
     }
+
+    @PostMapping("/{courseId}/students/{studentId}")
+    public ResponseEntity addStudentToCourse(@PathVariable Long courseId, @PathVariable Long studentId) {
+        try {
+            CourseDto courseDto = courseService.addStudentToCourse(courseId, studentId);
+            return ResponseEntity.ok(courseDto);
+        } catch (NotFoundExep e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\": \"Internal server error\"}");
+        }
+    }
+
+    @DeleteMapping("/{courseId}/students/{studentId}")
+    public ResponseEntity removeStudentFromCourse(@PathVariable Long courseId, @PathVariable Long studentId) {
+        try {
+            CourseDto courseDto = courseService.removeStudentFromCourse(courseId, studentId);
+            return ResponseEntity.ok(courseDto);
+        } catch (NotFoundExep e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\": \"Internal server error\"}");
+        }
+    }
+
 }

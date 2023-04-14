@@ -1,7 +1,9 @@
 package com.example.demo.entitys;
 
 
-import jakarta.persistence.*;
+import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import java.util.*;
@@ -23,5 +25,6 @@ public class Student {
             name = "student_course",
             joinColumns = @JoinColumn(name = "student_id"),
             inverseJoinColumns = @JoinColumn(name = "course_id"))
-    private Set<Course> courses = new HashSet<>();
+    @JsonBackReference
+    private List<Course> courses;
 }

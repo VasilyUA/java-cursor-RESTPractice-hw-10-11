@@ -1,6 +1,6 @@
 package com.example.demo.entitys;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.*;
 
 import java.util.*;
@@ -20,5 +20,5 @@ public class Course {
     private String price;
 
     @ManyToMany(mappedBy = "courses", cascade = CascadeType.ALL)
-    private Set<Student> students = new HashSet<>();
+    private List<Student> students;
 }

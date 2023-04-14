@@ -4,6 +4,7 @@ import com.example.demo.dtos.student.input.*;
 import com.example.demo.dtos.student.output.*;
 import com.example.demo.exceptions.*;
 import com.example.demo.services.*;
+import io.swagger.annotations.Api;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Api(tags = "Students")
 @RestController
 @RequestMapping("/api/students")
 @RequiredArgsConstructor
@@ -74,4 +76,29 @@ public class StudentsController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\": \"Internal server error\"}");
         }
     }
+
+    @PostMapping("/{studentId}/courses/{courseId}")
+    public ResponseEntity addCourseToStudent(@PathVariable Long studentId, @PathVariable Long courseId) {
+        try {
+            StudentDto studentDto = studentService.addCourseToStudent(studentId, courseId);
+            return ResponseEntity.ok(studentDto);
+        } catch (NotFoundExep e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\": \"Internal server error" + e.getMessage() + "\"}");
+        }
+    }
+
+    @DeleteMapping("/{studentId}/courses/{courseId}")
+    public ResponseEntity removeCourseFromStudent(@PathVariable Long studentId, @PathVariable Long courseId) {
+        try {
+            StudentDto studentDto = studentService.removeCourseFromStudent(studentId, courseId);
+            return ResponseEntity.ok(studentDto);
+        } catch (NotFoundExep e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\": \"Internal server error" + e.getMessage() + "\"}");
+        }
+    }
+
 }

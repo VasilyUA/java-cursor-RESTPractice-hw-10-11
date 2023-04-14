@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class CourseService {
 
     private final CourseRepo courseRepo;
+    private final StudentRepo studentRepo;
     private final ObjectMapper objectMapper;
 
     public CourseDto createCourse(CreateCourseDto createCourseDto) {
@@ -53,6 +54,27 @@ public class CourseService {
         }
         courseRepo.deleteById(courseId);
     }
+
+    public CourseDto addStudentToCourse(Long courseId, Long studentId) {
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new NotFoundExep("Course not found with id: " + courseId));
+        Student student = studentRepo.findById(studentId)
+                .orElseThrow(() -> new NotFoundExep("Student not found with id: " + studentId));
+        course.getStudents().add(student);
+        courseRepo.save(course);
+        return convertToDto(course);
+    }
+
+    public CourseDto removeStudentFromCourse(Long courseId, Long studentId) {
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new NotFoundExep("Course not found with id: " + courseId));
+        Student student = studentRepo.findById(studentId)
+                .orElseThrow(() -> new NotFoundExep("Student not found with id: " + studentId));
+        course.getStudents().remove(student);
+        courseRepo.save(course);
+        return convertToDto(course);
+    }
+
 
     private CourseDto convertToDto(Course course) {
         return objectMapper.convertValue(course, CourseDto.class);

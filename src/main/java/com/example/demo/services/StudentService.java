@@ -1,5 +1,6 @@
 package com.example.demo.services;
 
+import com.example.demo.dtos.course.output.*;
 import com.example.demo.dtos.student.input.*;
 import com.example.demo.dtos.student.output.*;
 import com.example.demo.entitys.*;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 public class StudentService {
 
     private final StudentRepo studentRepo;
+    private final CourseRepo courseRepo;
     private final ObjectMapper objectMapper;
 
     public StudentDto createStudent(CreateStudentDto createStudentDto) {
@@ -54,7 +56,47 @@ public class StudentService {
         studentRepo.deleteById(studentId);
     }
 
+    public StudentDto addCourseToStudent(Long studentId, Long courseId) {
+        Student student = studentRepo.findById(studentId)
+                .orElseThrow(() -> new NotFoundExep("Student not found with id: " + studentId));
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new NotFoundExep("Course not found with id: " + courseId));
+        student.getCourses().add(course);
+        studentRepo.save(student);
+
+        return convertToDto(student);
+    }
+
+    public StudentDto removeCourseFromStudent(Long studentId, Long courseId) {
+        Student student = studentRepo.findById(studentId)
+                .orElseThrow(() -> new NotFoundExep("Student not found with id: " + studentId));
+        Course course = courseRepo.findById(courseId)
+                .orElseThrow(() -> new NotFoundExep("Course not found with id: " + courseId));
+        student.getCourses().remove(course);
+        studentRepo.save(student);
+        return convertToDto(student);
+    }
+
+
     private StudentDto convertToDto(Student student) {
-        return objectMapper.convertValue(student, StudentDto.class);
+        var courses = student.getCourses();
+
+        if (courses == null) {
+            return objectMapper.convertValue(student, StudentDto.class);
+        }
+
+        List<CourseDto> courseDto = courses.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        student.setCourses(null);
+
+        var studentDto = objectMapper.convertValue(student, StudentDto.class);
+        studentDto.setCourses(courseDto);
+
+        return studentDto;
+    }
+
+    private CourseDto convertToDto(Course course) {
+        return objectMapper.convertValue(course, CourseDto.class);
     }
 }

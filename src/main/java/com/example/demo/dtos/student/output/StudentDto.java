@@ -9,5 +9,10 @@ import java.util.*;
 public class StudentDto {
     private Long id;
     private String email;
-    private Set<CourseDto> courses;
+    private List<CourseDto> courses;
+
+    public StudentDto(Long id, List<CourseDto> collect) {
+        this.id = id;
+        this.courses = collect;
+    }
 }

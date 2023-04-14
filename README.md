@@ -50,3 +50,5 @@ gradle test
 # go to http://localhost:5000 you will see the page react
 # go to http://localhost:5000/api
 ```
+
+## Open swagger-ui on url: http://localhost:5000/swagger-ui/index.html

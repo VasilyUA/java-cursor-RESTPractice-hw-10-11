@@ -1,41 +1,32 @@
 package com.example.demo.unit;
 
 import com.example.demo.controllers.HealthyController;
-import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.io.PrintWriter;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@WebMvcTest(HealthyController.class)
 class HealthyControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
 
     @Test
     void healthy() throws Exception {
-        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-        PrintWriter writer = Mockito.mock(PrintWriter.class);
-        Mockito.when(response.getWriter()).thenReturn(writer);
-
-        HealthyController controller = new HealthyController();
-        controller.healthy(response);
-
-        Mockito.verify(response, Mockito.times(1)).setStatus(200);
-        Mockito.verify(response, Mockito.times(1)).setHeader("Content-Type", "application/json");
-        Mockito.verify(writer, Mockito.times(1)).println("{\"status\":\"ok\"}");
-        Mockito.verify(writer, Mockito.times(1)).close();
+        mockMvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(result -> assertEquals("{\"status\":\"ok\"}", result.getResponse().getContentAsString()));
     }
 
     @Test
     void healthyApi() throws Exception {
-        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-        PrintWriter writer = Mockito.mock(PrintWriter.class);
-        Mockito.when(response.getWriter()).thenReturn(writer);
-
-        HealthyController controller = new HealthyController();
-        controller.healthyApi(response);
-
-        Mockito.verify(response, Mockito.times(1)).setStatus(200);
-        Mockito.verify(response, Mockito.times(1)).setHeader("Content-Type", "application/json");
-        Mockito.verify(writer, Mockito.times(1)).println("{\"status\":\"ok\"}");
-        Mockito.verify(writer, Mockito.times(1)).close();
+        mockMvc.perform(get("/api"))
+                .andExpect(status().isOk())
+                .andExpect(result -> assertEquals("{\"status\":\"ok\"}", result.getResponse().getContentAsString()));
     }
 }
