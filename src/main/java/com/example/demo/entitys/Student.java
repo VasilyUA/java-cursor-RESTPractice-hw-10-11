@@ -27,4 +27,13 @@ public class Student {
             inverseJoinColumns = @JoinColumn(name = "course_id"))
     @JsonBackReference
     private List<Course> courses;
+
+    public void enrollInCourse(Course course) {
+        if (courses == null) {
+            courses = new ArrayList<>();
+        }
+        courses.add(course);
+        course.getStudents().add(this);
+    }
+
 }

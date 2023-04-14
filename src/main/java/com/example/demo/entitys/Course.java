@@ -21,4 +21,12 @@ public class Course {
 
     @ManyToMany(mappedBy = "courses", cascade = CascadeType.ALL)
     private List<Student> students;
+
+    public void enrollStudent(Student student) {
+        if (students == null) {
+            students = new ArrayList<>();
+        }
+        students.add(student);
+        student.getCourses().add(this);
+    }
 }

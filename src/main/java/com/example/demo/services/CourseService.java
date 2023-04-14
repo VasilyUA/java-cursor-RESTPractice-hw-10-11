@@ -60,7 +60,8 @@ public class CourseService {
                 .orElseThrow(() -> new NotFoundExep("Course not found with id: " + courseId));
         Student student = studentRepo.findById(studentId)
                 .orElseThrow(() -> new NotFoundExep("Student not found with id: " + studentId));
-        course.getStudents().add(student);
+
+        course.enrollStudent(student);
         courseRepo.save(course);
         return convertToDto(course);
     }
@@ -68,12 +69,21 @@ public class CourseService {
     public CourseDto removeStudentFromCourse(Long courseId, Long studentId) {
         Course course = courseRepo.findById(courseId)
                 .orElseThrow(() -> new NotFoundExep("Course not found with id: " + courseId));
-        Student student = studentRepo.findById(studentId)
-                .orElseThrow(() -> new NotFoundExep("Student not found with id: " + studentId));
-        course.getStudents().remove(student);
+
+        List<Student> studentsToRemove = course.getStudents().stream()
+                .filter(student -> student.getId().equals(studentId))
+                .peek(student -> student.getCourses().remove(course))
+                .toList();
+
+        if (studentsToRemove.isEmpty()) {
+            throw new NotFoundExep("Student not found with id: " + studentId + " in course with id: " + courseId);
+        }
+
+        course.getStudents().removeAll(studentsToRemove);
         courseRepo.save(course);
         return convertToDto(course);
     }
+
 
 
     private CourseDto convertToDto(Course course) {

@@ -2,6 +2,9 @@ package com.example.demo.integration;
 
 import com.example.demo.dtos.course.input.CreateCourseDto;
 import com.example.demo.dtos.course.output.CourseDto;
+import com.example.demo.dtos.student.input.CreateStudentDto;
+import com.example.demo.dtos.student.output.StudentDto;
+import com.example.demo.repositories.CourseRepo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -44,6 +48,9 @@ public class CoursesControllerIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private CourseRepo courseRepo;
 
     private MockMvc mockMvc;
 
@@ -151,6 +158,54 @@ public class CoursesControllerIntegrationTest {
 
         mockMvc.perform(get("/api/courses/{id}", courseId))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testRemoveStudentFromCourse() throws Exception {
+        CreateCourseDto createCourseDto = new CreateCourseDto();
+        createCourseDto.setName("Test Course 74");
+        createCourseDto.setDescription("Test Course Description 74");
+        createCourseDto.setCategory("Test Category 74");
+        createCourseDto.setPrice(500.00);
+
+        String courseJson = mockMvc.perform(post("/api/courses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createCourseDto)))
+                .andReturn().getResponse().getContentAsString();
+
+        CourseDto createdCourse = objectMapper.readValue(courseJson, CourseDto.class);
+        Long courseId = createdCourse.getId();
+
+        CreateStudentDto createStudentDto = new CreateStudentDto();
+        createStudentDto.setEmail("test5@example.com");
+        createStudentDto.setPassword("Test1234");
+
+        String studentJson = mockMvc.perform(post("/api/students")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createStudentDto)))
+                .andReturn().getResponse().getContentAsString();
+
+        StudentDto createdStudent = objectMapper.readValue(studentJson, StudentDto.class);
+        Long studentId = createdStudent.getId();
+
+
+        mockMvc.perform(post("/api/courses/{courseId}/students/{studentId}", courseId, studentId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(courseId))
+                .andExpect(jsonPath("$.name").value("Test Course 74"));
+
+
+
+        mockMvc.perform(delete("/api/courses/{courseId}/students/{studentId}", courseId, studentId))
+                .andExpect(status().isOk());
+
+        var studentResp = mockMvc.perform(get("/api/students/{id}", studentId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        StudentDto student = objectMapper.readValue(studentResp, StudentDto.class);
+        var course = student.getCourses();
+        assertEquals(0, course.size());
     }
 }
 

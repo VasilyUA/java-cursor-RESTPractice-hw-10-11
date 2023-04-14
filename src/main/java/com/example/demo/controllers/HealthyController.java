@@ -1,24 +1,31 @@
 package com.example.demo.controllers;
 
-import io.swagger.annotations.ApiOperation;
+import com.example.demo.configs.AppProperties;
 import io.swagger.annotations.Api;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-
 @Api(tags = "Healthy")
-@RestController
-@RequestMapping("/")
+@Controller
 public class HealthyController {
 
-    @ApiOperation(value = "Check if the server is healthy")
-    @GetMapping
-    public ResponseEntity healthy() {
-        return ResponseEntity.ok("{\"status\":\"ok\"}");
+    private final AppProperties appProperties;
+
+    public HealthyController(AppProperties appProperties) {
+        this.appProperties = appProperties;
     }
-    @GetMapping("/api")
-    public ResponseEntity healthyApi() throws IOException {
-        return ResponseEntity.ok("{\"status\":\"ok\"}");
+
+    @RequestMapping(value = {"/", "/{path:[^\\.]*}"}, method = RequestMethod.GET)
+    public Object healthy(Model model) {
+        String health = appProperties.getHealth();
+        if ("healthy".equals(health)) {
+            model.addAttribute("title", "Hi frontend!");
+            return "index";
+        } else {
+            return ResponseEntity.ok("{\"status\":\"ok\"}");
+        }
     }
 }
